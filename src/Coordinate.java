@@ -23,11 +23,11 @@ public class Coordinate {
 	// equals method used for contains()
 	@Override
 	public boolean equals(Object object){
-		if (object == null) return false;
+            if (object == null) return false;
 	    if (object == this) return true;
 	    if (this.getClass() != object.getClass()) return false;
-		Coordinate c = (Coordinate) object;
-		if(this.hashCode()== c.hashCode()) return true;
+            Coordinate c = (Coordinate) object;
+            if(this.hashCode()== c.hashCode()) return true;
 	    return ((this.row == c.row) && (this.col == c.col));
 	}
 	

@@ -36,7 +36,7 @@ public class MainFrame extends JFrame {
 	
 	private int numRow, numCol, currentStep;
 	private String questionSelected = " ";
-	private String solution = "";
+	private String solution = "", arrowSolution = "";
 	private String[] steps;
 	
 	private HashSet<Coordinate> walls;
@@ -46,8 +46,8 @@ public class MainFrame extends JFrame {
 	private String[] puzzleStates; // string containing puzzle state for each step
 	
 	// choices for scroll-down menu
-	private String[] choices = {"Breadth-First", "Depth-First", "Uniform-Cost", 
-			"Greedy", "A*"}; 
+	private String[] choices = {"anchura", "profundidad", /*"Uniform-Cost", */
+			"primero mejor", "A*"}; 
 	
 	private String[] hChoices = {"Manhattan", "Euclidean", 
 			"Hungarian", "Max{h1, h2, h3}"};
@@ -98,13 +98,13 @@ public class MainFrame extends JFrame {
 		
 		// set step label
 		stepLabel = new JLabel();
-		stepLabel.setText("Show steps:");
+		stepLabel.setText("Pasos:");
 		stepLabel.setVisible(false);
 		
 		// add prev & next buttons to control each step
-		prev = new JButton("Previous");
+		prev = new JButton("Anterior");
 		prev.setVisible(false);
-		next = new JButton("Next");
+		next = new JButton("Siguiente");
 		next.setVisible(false);
 		
 		loadingPanel.add(loadingLabel);
@@ -147,14 +147,14 @@ public class MainFrame extends JFrame {
 		answerText.setEditable(false); //disable user editing function
 		answerText.setLineWrap(true); //wrap lines when item name is too long
 		Font font = new Font("Monaco", Font.PLAIN, 12);
-        answerText.setFont(font);
+                answerText.setFont(font);
 		
 		answerPanel.add(answerText);
 		JScrollPane answerPane = new JScrollPane(answerPanel);
 		//putting answerPanel into JScrollPane to allow scrolls to appear
 		answerPane.setSize(new Dimension(700,350));
 		answerPane.setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
-		answerPane.setBorder(BorderFactory.createTitledBorder("Answer"));
+		answerPane.setBorder(BorderFactory.createTitledBorder("Resultado de ejecucion"));
 		return answerPane;
 	}
 
@@ -168,7 +168,8 @@ public class MainFrame extends JFrame {
 		topPanel.setSize(new Dimension(700, 100));
 		topPanel.setLayout(new GridLayout(2, 1));
 		
-		// add Sokoban logo on the top grid
+		// add Sokoban logo on the top grid.
+                // We remove it in this fork.
 		Image logo = ImageIO.read(new File("img/sokoban-logo.png"));
 		Image resizedLogo = logo.getScaledInstance(700, 50,
 				Image.SCALE_SMOOTH); // resize image to fit the frame
@@ -192,7 +193,7 @@ public class MainFrame extends JFrame {
 		heuristicsMenu.setVisible(false);
 		
 		// add submit button to the questionPanel
-		submit = new JButton("Solve");
+		submit = new JButton("Resolver");
 		
 		// add question labels and fields to questionPanel
 		SpringLayout layout = new SpringLayout();
@@ -261,14 +262,13 @@ public class MainFrame extends JFrame {
 		
 		// add actionListner to submit button
 		submit.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				
+			public void actionPerformed(ActionEvent arg0) {				
 				// get answer from the SokobanSolver, and display it
 				// on the center panel
 				try {
 					int numPlayer = solver.loadFile(questionField1.getText(), hChoice);
 					if (numPlayer != 1) {
-						displayMessage("Please have only 1 player in the puzzle");
+						displayMessage("Por favor solo incluya 1 jugador en el plano");
 					}
 					else {
 						numRow = solver.getRow();
@@ -279,22 +279,27 @@ public class MainFrame extends JFrame {
 						player = solver.getPlayer();
 						currentStep = 0;
 						char method = Character.toLowerCase(questionSelected.charAt(0));
-						String answer = solver.solve(method);
+						String answer = solver.solve(method);                                                                                                
 						System.out.println(answer);
 						String[] lines = answer.split("\\r?\\n");
 						solution = lines[1];
+                                                arrowSolution = solution;                                                
+                                                arrowSolution = arrowSolution.replace('u', '↑');                                                
+                                                arrowSolution = arrowSolution.replace('d', '↓');
+                                                arrowSolution = arrowSolution.replace('l', '←');
+                                                arrowSolution = arrowSolution.replace('r', '→');
 						steps = solution.split(" ");
 						puzzleStates = new String[steps.length+1];
 						String totalSteps = lines[2];
-						answerText.setText("Solution: " + solution + " " + totalSteps);
+						answerText.setText("Solucion: " + arrowSolution + " " + totalSteps);
 						String runtime = answer.substring(answer.indexOf("units")+7);
-						String message = questionSelected + " search. Total runtime : " + runtime;
+						String message = "algoritmo " + questionSelected + ". Tiempo total: " + runtime;
 						if (answer.contains("Failed")) {
-							displayMessage("No solution found using " + message);
+							displayMessage("No se pudo calcular una solucion " + message);
 							repaint();
 						}
 						else {
-							displayMessage("Solution found using " + message);
+							displayMessage("Solucion encontrada " + message);
 							stepLabel.setVisible(true);
 							prev.setVisible(true);
 							next.setVisible(true);
@@ -379,8 +384,8 @@ public class MainFrame extends JFrame {
 	 */
 	private void updatePuzzle() {
 		int totalSteps = steps.length;
-		String output = "Solution: " + solution + "(total of " + totalSteps + " steps)\n\n";
-		output += "Showing step " + currentStep + ":\n";
+		String output = "Solucion: " + arrowSolution + " (" + totalSteps + " pasos en total)\n\n";
+		output += "Mostrando paso " + currentStep + ":\n";
 		// if puzzle state for the current step is never stored, set new puzzle state
 		if (puzzleStates[currentStep] == null) {
 			String position = "";
@@ -388,15 +393,19 @@ public class MainFrame extends JFrame {
 				for (int j=0; j<numCol; j++) {
 					Coordinate c = new Coordinate(i, j);
 					if (player.equals(c))
-						position += "@";
-					else if (boxes.contains(c))
-						position += "$";
+						position += "J";
+					else if (boxes.contains(c)) { 
+                                            if (goals.contains(c))
+                                                position += "L";
+                                            else
+                                                position += "$";
+                                        }
 					else if (goals.contains(c))
-						position += ".";
+						position += "V";
 					else if (walls.contains(c))
 						position += "#";
 					else
-						position += " ";
+						position += "_";
 				}
 				position += "\n";
 			}
@@ -415,7 +424,7 @@ public class MainFrame extends JFrame {
 	 * @param message
 	 */
 	private void displaySolvingMessage(String message) {
-		loadingLabel.setText("Solving the puzzle using " + message + " search...");
+		loadingLabel.setText("Resolviendo con el algoritmo " + message + "...");
 		repaint();
 	}
 
@@ -460,22 +469,22 @@ public class MainFrame extends JFrame {
 	 * @param selected String that contains the selected search method
 	 */
 	private void updateQuestion(String selected) {
-		questionLabel1.setText("Enter the filename: ");
-		questionField1.setText("[filename]");
+		questionLabel1.setText("Nombre de archivo");
+		questionField1.setText("[plano sokoban]");
 		questionField1.setPreferredSize(new Dimension(100, 20));
 		questionField1.setVisible(true);
 		submit.setEnabled(true);
-		if (selected.equals("a*")||selected.equals("greedy")) {
+		if (selected.equals("A*")||selected.equals("primero mejor")) {
 			questionLabel2.setText(". Heuristics: ");
 			heuristicsMenu.setVisible(true);
 		}
-		else if (selected.equals("breadth-first")||selected.equals("depth-first")||
+		else if (selected.equals("anchura")||selected.equals("profundidad")||
 				selected.equals("uniform-cost")) {
 			questionLabel2.setText(".");
 			heuristicsMenu.setVisible(false);
 		}
 		else {
-			questionLabel1.setText("Please select a search method from the left.");
+			questionLabel1.setText("Elija un algoritmo de busqueda");
 			questionField1.setVisible(false);
 			questionLabel2.setText("");
 			submit.setEnabled(false);

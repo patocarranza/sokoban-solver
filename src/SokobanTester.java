@@ -1,4 +1,5 @@
 import java.io.IOException;
+import javax.swing.UIManager;
 
 /**
  * SokobanTester solves easy to moderate sokoban puzzles using different search algorithms.
@@ -8,7 +9,14 @@ import java.io.IOException;
  */
 public class SokobanTester {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) {            
+                try {            
+                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                } catch (ClassNotFoundException ex) {
+                } catch (InstantiationException ex) {
+                } catch (IllegalAccessException ex) {
+                } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+                }   
 		try {
 			MainFrame m = new MainFrame();
 		} catch (IOException e) {

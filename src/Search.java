@@ -15,8 +15,8 @@ import java.util.Stack;
  */
 public class Search {
 
-	//search strings
-	private static final String BFS = "Breadth-First Search";
+    //search strings
+    private static final String BFS = "Breadth-First Search";
     private static final String DFS = "Depth-First Search";
     private static final String UCS = "Uniform-Cost Search";
     private static final String ASTAR = "A* Search";
@@ -24,9 +24,9 @@ public class Search {
     
     private static Heuristics h;
 	
-	public Search(Heuristics h) {
-		Search.h = h;
-	}
+    public Search(Heuristics h) {
+            Search.h = h;
+    }
 	
 	/**
 	 * Implementation for breadth-first search.

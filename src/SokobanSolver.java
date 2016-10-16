@@ -50,13 +50,13 @@ public class SokobanSolver {
 				char c = next.charAt(j);
 				if (c=='#') //walls
 					walls.add(new Coordinate(i, j));
-				if (c == '@' || c == '+') { //player
+				if (c == '@' || c == '+' || c == 'J') { //player
 					player = new Coordinate(i, j);
 					numPlayer++;
 				}
-				if (c == '.' || c == '+' || c == '*') //goals
+				if (c == '.' || c == '+' || c == '*' || c == 'V' || c == 'L') //goals
 					goals.add(new Coordinate(i, j));
-				if (c == '$' || c == '*') //boxes
+				if (c == '$' || c == '*' || c == 'L') //boxes
 					boxes.add(new Coordinate(i,j));
 			}
 			if (next.length() > col)
@@ -78,7 +78,7 @@ public class SokobanSolver {
 		switch(method) {
 		case 'b':
 			return s.bfs(prob);
-		case 'd':
+		case 'p':
 			return s.dfs(prob);
 		case 'u':
 			return s.prioritySearch(prob, 'u');
